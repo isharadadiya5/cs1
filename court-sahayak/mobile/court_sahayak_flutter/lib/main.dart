@@ -1,0 +1,109 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+void main() => runApp(const CourtSahayakApp());
+
+class CourtSahayakApp extends StatefulWidget {
+  const CourtSahayakApp({super.key});
+  @override
+  State<CourtSahayakApp> createState() => _CourtSahayakAppState();
+}
+
+class _CourtSahayakAppState extends State<CourtSahayakApp> {
+  late ApiService api;
+  String endpoint = const String.fromEnvironment('API_BASE_URL', defaultValue: 'http://10.0.2.2:4173/api');
+
+  @override
+  void initState() { super.initState(); api = ApiService(endpoint); }
+  void updateEndpoint(String value) => setState(() { endpoint = value; api = ApiService(value); });
+
+  @override
+  Widget build(BuildContext context) => MaterialApp(
+    title: 'Court Sahayak',
+    debugShowCheckedModeBanner: false,
+    theme: ThemeData(useMaterial3: true, colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xff6258c7), brightness: Brightness.light), scaffoldBackgroundColor: const Color(0xfff7f7fb), fontFamily: 'Roboto'),
+    home: HomeShell(api: api, endpoint: endpoint, onEndpointChanged: updateEndpoint),
+  );
+}
+
+class HomeShell extends StatefulWidget {
+  const HomeShell({super.key, required this.api, required this.endpoint, required this.onEndpointChanged});
+  final ApiService api;
+  final String endpoint;
+  final ValueChanged<String> onEndpointChanged;
+  @override
+  State<HomeShell> createState() => _HomeShellState();
+}
+
+class _HomeShellState extends State<HomeShell> {
+  int tab = 0;
+  final titles = const ['Command Centre', 'Legal Research', 'Case Analysis', 'Practice'];
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(
+      backgroundColor: Colors.white, surfaceTintColor: Colors.white,
+      title: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(titles[tab], style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w800)), const Text('COURT SAHAYAK · SECURE WORKSPACE', style: TextStyle(fontSize: 9, letterSpacing: 1, color: Color(0xff777487)))]),
+      actions: [IconButton(onPressed: () => _settings(context), icon: const Icon(Icons.settings_outlined))],
+    ),
+    body: IndexedStack(index: tab, children: [DashboardScreen(api: widget.api, onOpenCase: _openCase), ResearchScreen(api: widget.api), CasesScreen(api: widget.api, onOpenCase: _openCase), PracticeScreen(api: widget.api)]),
+    bottomNavigationBar: NavigationBar(selectedIndex: tab, onDestinationSelected: (value) => setState(() => tab = value), destinations: const [NavigationDestination(icon: Icon(Icons.dashboard_outlined), selectedIcon: Icon(Icons.dashboard), label: 'Dashboard'), NavigationDestination(icon: Icon(Icons.search), label: 'Research'), NavigationDestination(icon: Icon(Icons.folder_outlined), selectedIcon: Icon(Icons.folder), label: 'Cases'), NavigationDestination(icon: Icon(Icons.balance_outlined), selectedIcon: Icon(Icons.balance), label: 'Practice')]),
+    floatingActionButton: tab == 2 ? FloatingActionButton.extended(onPressed: () => _newCase(context), icon: const Icon(Icons.add), label: const Text('New case')) : null,
+  );
+  void _openCase(CaseRecord item) => Navigator.of(context).push(MaterialPageRoute(builder: (_) => CaseDetailScreen(api: widget.api, initial: item)));
+  Future<void> _newCase(BuildContext context) async { final created = await showDialog<CaseRecord>(context: context, builder: (_) => NewCaseDialog(api: widget.api)); if (created != null && mounted) _openCase(created); }
+  void _settings(BuildContext context) { final controller = TextEditingController(text: widget.endpoint); showModalBottomSheet(context: context, showDragHandle: true, builder: (sheetContext) => Padding(padding: EdgeInsets.fromLTRB(24, 6, 24, MediaQuery.of(sheetContext).viewInsets.bottom + 24), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('Database API connection', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18)), const SizedBox(height: 8), const Text('Android emulator: http://10.0.2.2:4173/api\niOS simulator: http://127.0.0.1:4173/api', style: TextStyle(fontSize: 12, color: Color(0xff737184))), const SizedBox(height: 16), TextField(controller: controller, decoration: const InputDecoration(labelText: 'API base URL', border: OutlineInputBorder())), const SizedBox(height: 14), FilledButton(onPressed: () { widget.onEndpointChanged(controller.text.trim()); Navigator.pop(sheetContext); }, child: const Text('Save connection'))]))); }
+}
+
+class DashboardScreen extends StatelessWidget {
+  const DashboardScreen({super.key, required this.api, required this.onOpenCase});
+  final ApiService api; final ValueChanged<CaseRecord> onOpenCase;
+  @override
+  Widget build(BuildContext context) => FutureBuilder<List<CaseRecord>>(future: api.cases(), builder: (context, snapshot) {
+    if (snapshot.connectionState != ConnectionState.done) return const Center(child: CircularProgressIndicator());
+    if (snapshot.hasError) return ConnectionError(message: snapshot.error.toString());
+    final cases = snapshot.data ?? [];
+    return RefreshIndicator(onRefresh: () async => (context as Element).markNeedsBuild(), child: ListView(padding: const EdgeInsets.all(20), children: [const Text('Good morning, Justice Mehra.', style: TextStyle(fontSize: 27, fontWeight: FontWeight.w800, letterSpacing: -1)), const SizedBox(height: 5), const Text('Here is the judicial picture for your commercial docket.', style: TextStyle(color: Color(0xff777487))), const SizedBox(height: 22), Row(children: [Metric(label: 'ACTIVE MATTERS', value: '${cases.length}', icon: Icons.folder_copy_outlined), const SizedBox(width: 12), const Metric(label: 'DUE THIS WEEK', value: '07', icon: Icons.schedule_outlined)]), const SizedBox(height: 20), const SectionLabel('MATTERS REQUIRING ATTENTION'), ...cases.take(3).map((item) => CaseCard(item: item, onTap: () => onOpenCase(item))), const SizedBox(height: 18), const SectionLabel('AI DOCKET INSIGHT'), const InsightCard()]);
+  });
+}
+
+class ResearchScreen extends StatefulWidget { const ResearchScreen({super.key, required this.api}); final ApiService api; @override State<ResearchScreen> createState() => _ResearchScreenState(); }
+class _ResearchScreenState extends State<ResearchScreen> { final query = TextEditingController(text: 'Arbitration clause enforceability in commercial agreements'); bool saving = false; String message = 'Search precedents, statutes, and judicial interpretation.';
+  Future<void> runSearch() async { if (query.text.trim().isEmpty) return; setState(() => saving = true); try { final result = await widget.api.research(query.text.trim()); setState(() => message = '${result['resultCount']} authorities found — search saved to the database.'); } catch (error) { setState(() => message = error.toString()); } finally { if (mounted) setState(() => saving = false); } }
+  @override Widget build(BuildContext context) => ListView(padding: const EdgeInsets.all(20), children: [const Text('Legal research', style: TextStyle(fontSize: 27, fontWeight: FontWeight.w800)), const SizedBox(height: 5), Text(message, style: const TextStyle(color: Color(0xff777487))), const SizedBox(height: 20), TextField(controller: query, minLines: 2, maxLines: 3, decoration: InputDecoration(hintText: 'Ask a legal question', border: const OutlineInputBorder(), suffixIcon: IconButton(onPressed: saving ? null : runSearch, icon: saving ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.arrow_upward))), onSubmitted: (_) => runSearch()), const SizedBox(height: 22), const SectionLabel('VERIFIED AUTHORITIES'), const AuthorityCard(court: 'SUPREME COURT · 2024', title: 'N. N. Global Mercantile Pvt. Ltd. v. Indo Unique Flame Ltd.', note: 'Arbitration agreement and stamping at the reference stage.'), const AuthorityCard(court: 'DELHI HIGH COURT · 2025', title: 'Vistara Systems Ltd. v. Argo Projects LLP', note: 'Commercial parties are held to negotiated dispute-resolution mechanisms.')]); }
+}
+
+class CasesScreen extends StatelessWidget { const CasesScreen({super.key, required this.api, required this.onOpenCase}); final ApiService api; final ValueChanged<CaseRecord> onOpenCase;
+  @override Widget build(BuildContext context) => FutureBuilder<List<CaseRecord>>(future: api.cases(), builder: (context, snapshot) { if (snapshot.connectionState != ConnectionState.done) return const Center(child: CircularProgressIndicator()); if (snapshot.hasError) return ConnectionError(message: snapshot.error.toString()); final cases = snapshot.data ?? []; return ListView(padding: const EdgeInsets.all(20), children: [const Text('Case analysis', style: TextStyle(fontSize: 27, fontWeight: FontWeight.w800)), const SizedBox(height: 6), const Text('Every matter is backed by its persistent case record.', style: TextStyle(color: Color(0xff777487))), const SizedBox(height: 18), ...cases.map((item) => CaseCard(item: item, onTap: () => onOpenCase(item)))]); }); }
+}
+
+class CaseDetailScreen extends StatefulWidget { const CaseDetailScreen({super.key, required this.api, required this.initial}); final ApiService api; final CaseRecord initial; @override State<CaseDetailScreen> createState() => _CaseDetailScreenState(); }
+class _CaseDetailScreenState extends State<CaseDetailScreen> { late Future<CaseDetail> detail; @override void initState() { super.initState(); detail = widget.api.caseDetail(widget.initial.id); }
+  Future<void> upload() async { final file = await FilePicker.platform.pickFiles(withData: true); if (file == null || file.files.single.bytes == null) return; try { await widget.api.uploadDocument(widget.initial.id, file.files.single.name, file.files.single.bytes!, file.files.single.extension ?? ''); if (mounted) { setState(() => detail = widget.api.caseDetail(widget.initial.id)); ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Document saved to the case record.'))); } } catch (error) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.toString()))); } }
+  @override Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: const Text('Case record'), actions: [IconButton(onPressed: upload, icon: const Icon(Icons.upload_file_outlined), tooltip: 'Upload document')]), body: FutureBuilder<CaseDetail>(future: detail, builder: (context, snapshot) { if (!snapshot.hasData) return const Center(child: CircularProgressIndicator()); final item = snapshot.data!; return ListView(padding: const EdgeInsets.all(20), children: [Text(item.title, style: const TextStyle(fontSize: 25, fontWeight: FontWeight.w800)), const SizedBox(height: 5), Text('${item.caseNumber} · ${item.stage} · ${item.nextHearing}', style: const TextStyle(color: Color(0xff777487))), const SizedBox(height: 18), Card(child: Padding(padding: const EdgeInsets.all(18), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const SectionLabel('AI CASE SUMMARY'), Text(item.summary, style: const TextStyle(height: 1.55)), const SizedBox(height: 14), LinearProgressIndicator(value: item.matterHealth / 100), const SizedBox(height: 6), Text('Matter health ${item.matterHealth}/100', style: const TextStyle(fontWeight: FontWeight.w700))]))), const SizedBox(height: 20), const SectionLabel('DOCUMENT INTELLIGENCE'), if (item.documents.isEmpty) const Text('No documents saved yet.'), ...item.documents.map((doc) => ListTile(contentPadding: const EdgeInsets.symmetric(horizontal: 6), leading: const CircleAvatar(child: Icon(Icons.description_outlined)), title: Text(doc.name), subtitle: Text('${doc.status} · ${doc.sizeLabel}'), trailing: const Icon(Icons.chevron_right)))]); })); }
+}
+
+class PracticeScreen extends StatefulWidget { const PracticeScreen({super.key, required this.api}); final ApiService api; @override State<PracticeScreen> createState() => _PracticeScreenState(); }
+class _PracticeScreenState extends State<PracticeScreen> { bool saved = false; Future<void> start() async { try { await widget.api.debate('Contractual notice compliance'); setState(() => saved = true); } catch (_) {} }
+  @override Widget build(BuildContext context) => ListView(padding: const EdgeInsets.all(20), children: [const Text('Argument stress test', style: TextStyle(fontSize: 27, fontWeight: FontWeight.w800)), const SizedBox(height: 6), const Text('Compare competing arguments while keeping the court record in view.', style: TextStyle(color: Color(0xff777487))), const SizedBox(height: 20), const ArgumentTile(label: 'CLAIMANT POSITION', icon: Icons.gavel_outlined, text: 'The notice condition is mandatory and the delay had already begun before the asserted force-majeure event.'), const ArgumentTile(label: 'RESPONDENT POSITION', icon: Icons.shield_outlined, text: 'The flood event was outside reasonable control and materially prevented performance.'), const SizedBox(height: 18), FilledButton.icon(onPressed: start, icon: const Icon(Icons.save_outlined), label: Text(saved ? 'Saved to database' : 'Save debate session'))]); }
+}
+
+class NewCaseDialog extends StatefulWidget { const NewCaseDialog({super.key, required this.api}); final ApiService api; @override State<NewCaseDialog> createState() => _NewCaseDialogState(); }
+class _NewCaseDialogState extends State<NewCaseDialog> { final title = TextEditingController(); final number = TextEditingController(); bool saving = false; @override Widget build(BuildContext context) => AlertDialog(title: const Text('New case review'), content: Column(mainAxisSize: MainAxisSize.min, children: [TextField(controller: title, decoration: const InputDecoration(labelText: 'Case title')), TextField(controller: number, decoration: const InputDecoration(labelText: 'Case number'))]), actions: [TextButton(onPressed: saving ? null : () => Navigator.pop(context), child: const Text('Cancel')), FilledButton(onPressed: saving ? null : () async { setState(() => saving = true); try { final item = await widget.api.createCase(title.text, number.text); if (mounted) Navigator.pop(context, item); } catch (error) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.toString()))); } finally { if (mounted) setState(() => saving = false); } }, child: const Text('Save case'))]); }
+}
+
+class Metric extends StatelessWidget { const Metric({super.key, required this.label, required this.value, required this.icon}); final String label, value; final IconData icon; @override Widget build(BuildContext context) => Expanded(child: Card(child: Padding(padding: const EdgeInsets.all(15), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Icon(icon, color: const Color(0xff6258c7)), const SizedBox(height: 11), Text(value, style: const TextStyle(fontSize: 25, fontWeight: FontWeight.w800)), Text(label, style: const TextStyle(fontSize: 9, letterSpacing: .7, color: Color(0xff777487)))])))); }
+class CaseCard extends StatelessWidget { const CaseCard({super.key, required this.item, required this.onTap}); final CaseRecord item; final VoidCallback onTap; @override Widget build(BuildContext context) => Card(child: ListTile(onTap: onTap, leading: CircleAvatar(backgroundColor: const Color(0xffefedff), child: Text(item.title.split(' ').take(2).map((part) => part[0]).join(), style: const TextStyle(color: Color(0xff554bb3), fontWeight: FontWeight.w800))), title: Text(item.title, style: const TextStyle(fontWeight: FontWeight.w700)), subtitle: Text('${item.caseNumber} · ${item.stage}'), trailing: Chip(label: Text(item.nextHearing, style: const TextStyle(fontSize: 10)))); }
+class SectionLabel extends StatelessWidget { const SectionLabel(this.text, {super.key}); final String text; @override Widget build(BuildContext context) => Padding(padding: const EdgeInsets.only(bottom: 9), child: Text(text, style: const TextStyle(fontSize: 10, letterSpacing: 1, fontWeight: FontWeight.w800, color: Color(0xff777487)))); }
+class InsightCard extends StatelessWidget { const InsightCard({super.key}); @override Widget build(BuildContext context) => const Card(color: Color(0xff6258c7), child: Padding(padding: EdgeInsets.all(20), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('AI DOCKET INSIGHT', style: TextStyle(fontSize: 10, letterSpacing: 1, color: Color(0xffddd9ff))), SizedBox(height: 9), Text('Two matters need an early evidence review.', style: TextStyle(fontSize: 19, color: Colors.white, fontWeight: FontWeight.w800)), SizedBox(height: 6), Text('Potential document-dependency gaps appear before their next listed dates.', style: TextStyle(color: Color(0xffe4e1ff)))]))); }
+class AuthorityCard extends StatelessWidget { const AuthorityCard({super.key, required this.court, required this.title, required this.note}); final String court, title, note; @override Widget build(BuildContext context) => Card(child: Padding(padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(court, style: const TextStyle(fontSize: 9, letterSpacing: 1, fontWeight: FontWeight.w800, color: Color(0xff6258c7))), const SizedBox(height: 7), Text(title, style: const TextStyle(fontWeight: FontWeight.w800)), const SizedBox(height: 5), Text(note, style: const TextStyle(fontSize: 12, color: Color(0xff777487)))]))); }
+class ArgumentTile extends StatelessWidget { const ArgumentTile({super.key, required this.label, required this.icon, required this.text}); final String label, text; final IconData icon; @override Widget build(BuildContext context) => Card(child: Padding(padding: const EdgeInsets.all(18), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Row(children: [Icon(icon, size: 18, color: const Color(0xff6258c7)), const SizedBox(width: 8), Text(label, style: const TextStyle(fontSize: 10, letterSpacing: 1, fontWeight: FontWeight.w800))]), const SizedBox(height: 12), Text(text, style: const TextStyle(height: 1.5))]))); }
+class ConnectionError extends StatelessWidget { const ConnectionError({super.key, required this.message}); final String message; @override Widget build(BuildContext context) => Center(child: Padding(padding: const EdgeInsets.all(24), child: Text('Could not reach the Court Sahayak database.\n\n$message', textAlign: TextAlign.center))); }
+
+class CaseRecord { CaseRecord({required this.id, required this.title, required this.caseNumber, required this.stage, required this.nextHearing, required this.matterHealth, required this.summary}); final int id, matterHealth; final String title, caseNumber, stage, nextHearing, summary; factory CaseRecord.fromJson(Map<String, dynamic> json) => CaseRecord(id: json['id'] as int, title: json['title'] as String, caseNumber: json['case_number'] as String, stage: json['stage'] as String, nextHearing: json['next_hearing'] as String, matterHealth: json['matter_health'] as int, summary: (json['summary'] ?? '') as String); }
+class CaseDetail extends CaseRecord { CaseDetail({required super.id, required super.title, required super.caseNumber, required super.stage, required super.nextHearing, required super.matterHealth, required super.summary, required this.documents}); final List<StoredDocument> documents; factory CaseDetail.fromJson(Map<String, dynamic> json) => CaseDetail(id: json['id'] as int, title: json['title'] as String, caseNumber: json['case_number'] as String, stage: json['stage'] as String, nextHearing: json['next_hearing'] as String, matterHealth: json['matter_health'] as int, summary: (json['summary'] ?? '') as String, documents: (json['documents'] as List<dynamic>? ?? []).map((item) => StoredDocument.fromJson(item as Map<String, dynamic>)).toList()); }
+class StoredDocument { StoredDocument({required this.name, required this.status, required this.bytes}); final String name, status; final int bytes; String get sizeLabel => '${(bytes / 1000000).clamp(.1, 999).toStringAsFixed(1)} MB'; factory StoredDocument.fromJson(Map<String, dynamic> json) => StoredDocument(name: json['name'] as String, status: json['extraction_status'] as String, bytes: json['size_bytes'] as int); }
+class ApiService { ApiService(this.base); final String base; Future<List<CaseRecord>> cases() async { final response = await http.get(Uri.parse('$base/cases')); return _list(response).map(CaseRecord.fromJson).toList(); } Future<CaseDetail> caseDetail(int id) async => CaseDetail.fromJson(await _map(await http.get(Uri.parse('$base/cases/$id')))); Future<CaseRecord> createCase(String title, String caseNumber) async => CaseRecord.fromJson(await _map(await http.post(Uri.parse('$base/cases'), headers: _headers, body: jsonEncode({'title': title, 'caseNumber': caseNumber})))); Future<Map<String, dynamic>> research(String query) async => _map(await http.post(Uri.parse('$base/research'), headers: _headers, body: jsonEncode({'query': query}))); Future<void> debate(String issue) async { await _map(await http.post(Uri.parse('$base/debates'), headers: _headers, body: jsonEncode({'issue': issue}))); } Future<void> uploadDocument(int caseId, String name, Uint8List bytes, String extension) async { await _map(await http.post(Uri.parse('$base/documents'), headers: _headers, body: jsonEncode({'caseId': caseId, 'name': name, 'mimeType': extension, 'sizeBytes': bytes.length, 'base64': base64Encode(bytes)}))); } Map<String, String> get _headers => {'Content-Type': 'application/json'}; Map<String, dynamic> _map(http.Response response) { final decoded = jsonDecode(response.body) as Map<String, dynamic>; if (response.statusCode >= 300) throw Exception(decoded['error'] ?? 'Request failed'); return decoded; } List<Map<String, dynamic>> _list(http.Response response) { final decoded = jsonDecode(response.body) as List<dynamic>; if (response.statusCode >= 300) throw Exception('Request failed'); return decoded.cast<Map<String, dynamic>>(); } }

@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Court Sahayak — Judicial Research Workspace</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <a class="brand" href="#dashboard" aria-label="Court Sahayak home">
+          <span class="brand-mark">CS</span><span>Court<br /><b>Sahayak</b></span>
+        </a>
+        <nav class="nav" aria-label="Primary navigation">
+          <button class="nav-link active" data-view="dashboard"><span>⌂</span> Command Centre</button>
+          <button class="nav-link" data-view="research"><span>⌕</span> Legal Research</button>
+          <button class="nav-link" data-view="analysis"><span>◫</span> Case Analysis</button>
+          <button class="nav-link" data-view="graph"><span>⌘</span> Knowledge Graph</button>
+          <button class="nav-link" data-view="debate"><span>◌</span> Debate Practice</button>
+          <button class="nav-link" data-view="lawyer"><span>♙</span> Lawyer Desk</button>
+        </nav>
+        <div class="sidebar-footer">
+          <div class="secure"><span>●</span> Secure judicial workspace</div>
+          <button class="help">? &nbsp; Help & guidance</button>
+          <div class="profile"><span class="avatar">AM</span><span><b>Justice A. Mehra</b><small>Commercial Court · Delhi</small></span><button>⌄</button></div>
+        </div>
+      </aside>
+
+      <main class="main-content">
+        <header class="topbar">
+          <div class="crumb" id="page-eyebrow">Judicial workspace <span>›</span> Command Centre</div>
+          <div class="top-actions"><span class="sync-status" id="sync-status">● Connecting…</span><button class="icon-button" id="search-button" aria-label="Search">⌕</button><button class="icon-button notification" aria-label="Notifications">♢<i></i></button><button class="new-case" id="new-case">+&nbsp; New case review</button></div>
+        </header>
+
+        <section class="view active" id="dashboard">
+          <div class="hero">
+            <div><p class="eyebrow">Friday, 21 August 2026</p><h1>Good morning, Justice Mehra.</h1><p class="subtitle">Here is the judicial picture for your commercial docket.</p></div>
+            <div class="hero-case"><span class="case-dot"></span><div><small>Next hearing</small><b>Meridian Infra v. Vistara Systems</b><em>Today · 11:30 AM · Courtroom 4</em></div><button data-view="analysis">Open brief →</button></div>
+          </div>
+
+          <div class="stat-grid">
+            <article class="stat"><span class="stat-icon indigo">▤</span><div><small>Active matters</small><strong>28</strong><em>3 awaiting review</em></div></article>
+            <article class="stat"><span class="stat-icon coral">◷</span><div><small>Due this week</small><strong>07</strong><em>2 priority listings</em></div></article>
+            <article class="stat"><span class="stat-icon gold">⌁</span><div><small>Research saved</small><strong>146</strong><em>+12 this month</em></div></article>
+            <article class="stat"><span class="stat-icon teal">✓</span><div><small>Disposed this month</small><strong>11</strong><em>78% within target</em></div></article>
+          </div>
+
+          <div class="dashboard-grid">
+            <article class="panel docket-panel"><div class="panel-head"><div><p class="eyebrow">Your docket</p><h2>Matters requiring attention</h2></div><button class="text-button" data-view="analysis">View all cases →</button></div>
+              <div class="case-list">
+                <button class="case-row selected" data-case="Meridian Infrastructure v. Vistara Systems"><span class="case-initials blue">MI</span><span class="case-title"><b>Meridian Infrastructure v. Vistara Systems</b><small>CS (Comm) 184/2026 · Evidence</small></span><span class="tag today">Today</span><span class="chev">›</span></button>
+                <button class="case-row" data-case="Aster Foods v. Northland Retail"><span class="case-initials purple">AF</span><span class="case-title"><b>Aster Foods v. Northland Retail</b><small>CS (Comm) 201/2026 · Arguments</small></span><span class="tag tomorrow">Tomorrow</span><span class="chev">›</span></button>
+                <button class="case-row" data-case="Zenith Capital v. R. K. Traders"><span class="case-initials orange">ZC</span><span class="case-title"><b>Zenith Capital v. R. K. Traders</b><small>CS (Comm) 091/2025 · Orders</small></span><span class="tag risk">Overdue</span><span class="chev">›</span></button>
+              </div>
+            </article>
+            <article class="panel workload-panel"><div class="panel-head"><div><p class="eyebrow">Court workload</p><h2>Case-flow pulse</h2></div><button class="more">•••</button></div>
+              <div class="chart-wrap"><div class="y-axis"><span>12</span><span>8</span><span>4</span><span>0</span></div><div class="chart"><div class="gridline g1"></div><div class="gridline g2"></div><div class="gridline g3"></div><svg viewBox="0 0 570 170" preserveAspectRatio="none"><defs><linearGradient id="fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6259c7" stop-opacity=".28"/><stop offset="1" stop-color="#6259c7" stop-opacity="0"/></linearGradient></defs><path d="M0,131 C35,115 45,100 72,109 S110,130 143,87 S185,70 214,89 S254,105 285,67 S326,80 356,45 S400,36 427,58 S467,66 497,22 S536,38 570,9 L570,170 L0,170Z" fill="url(#fill)"/><path d="M0,131 C35,115 45,100 72,109 S110,130 143,87 S185,70 214,89 S254,105 285,67 S326,80 356,45 S400,36 427,58 S467,66 497,22 S536,38 570,9" fill="none" stroke="#6259c7" stroke-width="3"/></svg><div class="months"><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span></div></div></div>
+              <div class="chart-note"><span class="legend"></span><span>New commercial filings</span><b>+18.4%</b><small>vs. last 6 months</small></div>
+            </article>
+          </div>
+
+          <div class="dashboard-grid lower">
+            <article class="panel research-panel"><div class="panel-head"><div><p class="eyebrow">Research intelligence</p><h2>Trending judicial questions</h2></div><button class="text-button" data-view="research">Explore research →</button></div>
+              <button class="question"><span>01</span><div><b>Arbitration clause enforceability</b><small>43 recent references · Supreme Court</small></div><em>↗</em></button>
+              <button class="question"><span>02</span><div><b>Interim relief in shareholder disputes</b><small>31 recent references · Delhi High Court</small></div><em>↗</em></button>
+              <button class="question"><span>03</span><div><b>Electronic evidence admissibility</b><small>28 recent references · Multiple jurisdictions</small></div><em>↗</em></button>
+            </article>
+            <article class="panel insight-panel"><p class="eyebrow">AI docket insight</p><h2>Two matters need an early evidence review.</h2><p>The record suggests potential document-dependency gaps before their next listed dates.</p><button class="light-button" data-view="analysis">Review flagged matters <span>→</span></button><div class="insight-decoration">✦</div></article>
+          </div>
+        </section>
+
+        <section class="view" id="research">
+          <div class="section-title"><div><p class="eyebrow">Verified legal intelligence</p><h1>Legal research, with the record in view.</h1><p>Search precedents, statutes, and judicial interpretation across commercial law.</p></div></div>
+          <div class="research-search"><span>⌕</span><input id="research-input" value="Arbitration clause enforceability in commercial agreements" /><button id="run-research">Research</button></div>
+          <div class="research-layout"><aside class="research-filters"><b>REFINE RESULTS</b><label><input type="checkbox" checked /> Supreme Court</label><label><input type="checkbox" checked /> High Courts</label><label><input type="checkbox" /> Statutes</label><hr/><b>TIME RANGE</b><label><input type="radio" name="time" checked /> Last 5 years</label><label><input type="radio" name="time" /> All time</label></aside><div class="results"><div class="results-top"><b id="result-count">128 authorities found</b><span>Sorted by relevance ▾</span></div><article class="result-card"><span class="authority">SUPREME COURT · 2024</span><h2>N. N. Global Mercantile Pvt. Ltd. v. Indo Unique Flame Ltd.</h2><p>Whether an arbitration agreement embedded in an unstamped instrument can be acted upon at the reference stage.</p><div><mark>Arbitration agreement</mark><mark>Stamping</mark><button>Open authority →</button></div></article><article class="result-card"><span class="authority">DELHI HIGH COURT · 2025</span><h2>Vistara Systems Ltd. v. Argo Projects LLP</h2><p>Commercial parties are held to the dispute-resolution mechanism consciously negotiated in their agreements.</p><div><mark>Commercial contract</mark><mark>Section 8</mark><button>Open authority →</button></div></article><article class="result-card"><span class="authority">SUPREME COURT · 2023</span><h2>Cox and Kings Ltd. v. SAP India Pvt. Ltd.</h2><p>The group of companies doctrine may bind non-signatories in specific commercial circumstances.</p><div><mark>Non-signatory</mark><mark>Group companies</mark><button>Open authority →</button></div></article></div></div>
+        </section>
+
+        <section class="view" id="analysis">
+          <div class="case-header"><div><p class="eyebrow">CS (COMM) 184/2026 · EVIDENCE STAGE</p><h1 id="analysis-case">Meridian Infrastructure v. Vistara Systems</h1><p>Before the Commercial Court, Delhi · Next hearing: Today, 11:30 AM</p></div><div><input type="file" id="file-upload" hidden /><button class="outline-button" id="upload-doc">⇧ Upload document</button><button class="new-case" id="generate-brief">Generate brief</button></div></div>
+          <div class="case-tabs"><button class="active">Overview</button><button>Documents <span>12</span></button><button>Timeline</button><button>Evidence</button><button>Research</button></div>
+          <div class="analysis-grid"><div class="analysis-main"><article class="panel summary-card"><div class="panel-head"><div><p class="eyebrow">AI case summary</p><h2>Contract-performance dispute</h2></div><span class="confidence">92% confidence</span></div><p>The claimant alleges delayed delivery and quality deviations under an EPC supply agreement. The respondent disputes liability, relying on force-majeure notices and alleged variations in the scope of work.</p><div class="summary-points"><div><span>◉</span><div><b>Primary issue</b><small>Whether delay is excused under clause 18.2</small></div></div><div><span>◉</span><div><b>Key evidence</b><small>22 correspondence records and 4 technical reports</small></div></div><div><span>◉</span><div><b>Research signal</b><small>3 relevant Delhi HC decisions identified</small></div></div></div></article><article class="panel documents-card"><div class="panel-head"><div><p class="eyebrow">Document intelligence</p><h2>Record analysis</h2></div><button class="text-button" id="analyze-docs">Analyse all →</button></div><div class="document-row"><span class="file-icon">PDF</span><div><b>Supply Agreement — executed.pdf</b><small>24 pages · 18 clauses extracted</small></div><span class="status ok">Complete</span><button>›</button></div><div class="document-row"><span class="file-icon doc">DOC</span><div><b>Respondent Written Statement.docx</b><small>38 pages · 7 issues flagged</small></div><span class="status reviewing">Review</span><button>›</button></div><div class="document-row"><span class="file-icon msg">MSG</span><div><b>Project correspondence bundle.pdf</b><small>144 pages · 89 dates extracted</small></div><span class="status ok">Complete</span><button>›</button></div></article></div><aside class="case-side"><article class="panel score-card"><p class="eyebrow">Matter health</p><div class="score"><strong>74</strong><span>/100</span></div><div class="meter"><i style="width:74%"></i></div><p>Moderate complexity · Evidence trail is generally coherent.</p><div class="risk-row"><span>Evidence dependencies</span><b>2 flagged</b></div><div class="risk-row"><span>Missing documents</span><b class="green">None</b></div></article><article class="panel timeline-card"><div class="panel-head"><h2>Upcoming timeline</h2><button class="more">•••</button></div><div class="timeline"><div><i></i><span><b>Today · 11:30 AM</b><small>Evidence hearing</small></span></div><div><i></i><span><b>28 Aug 2026</b><small>Respondent affidavit due</small></span></div><div><i></i><span><b>04 Sep 2026</b><small>Next listing</small></span></div></div></article></aside></div>
+        </section>
+
+        <section class="view" id="graph"><div class="section-title graph-intro"><div><p class="eyebrow">Record relationships</p><h1>Case knowledge graph</h1><p>Connections extracted from the Meridian Infrastructure record.</p></div><button class="outline-button">Export graph</button></div><div class="graph-shell"><div class="graph-tools"><button class="active">All entities</button><button>People</button><button>Documents</button><button>Issues</button><button>Events</button></div><div class="graph-canvas"><svg viewBox="0 0 900 470" aria-label="Knowledge graph visualization"><g class="edges"><path d="M452 225 L245 120 M452 225 L710 120 M452 225 L235 360 M452 225 L682 356 M245 120 L105 220 M245 120 L250 280 M710 120 L805 225 M710 120 L680 270 M235 360 L365 335 M682 356 L525 360"/></g><g class="nodes"><g transform="translate(452 225)" class="node central"><circle r="72"/><text y="-8">MERIDIAN</text><text y="14">INFRASTRUCTURE</text></g><g transform="translate(245 120)" class="node indigo"><circle r="48"/><text>Supply agreement</text></g><g transform="translate(710 120)" class="node coral"><circle r="48"/><text>Vistara Systems</text></g><g transform="translate(235 360)" class="node teal"><circle r="48"/><text>Delay claim</text></g><g transform="translate(682 356)" class="node gold"><circle r="48"/><text>Force majeure</text></g><g transform="translate(105 220)" class="node small"><circle r="33"/><text>Clause 18.2</text></g><g transform="translate(250 280)" class="node small"><circle r="33"/><text>Annexure D</text></g><g transform="translate(805 225)" class="node small"><circle r="33"/><text>Notice 14</text></g><g transform="translate(680 270)" class="node small"><circle r="33"/><text>Emails</text></g><g transform="translate(365 335)" class="node small"><circle r="33"/><text>Losses</text></g><g transform="translate(525 360)" class="node small"><circle r="33"/><text>Flood event</text></g></g></svg><div class="graph-hint">Drag nodes to explore relationships</div></div></div></section>
+
+        <section class="view" id="debate"><div class="section-title"><div><p class="eyebrow">Supporting preparation module</p><h1>Argument stress test</h1><p>Explore both sides of an issue before the hearing. This tool supports preparation; judicial research remains evidence-backed.</p></div><button class="new-case" id="new-debate">+ New debate</button></div><div class="debate-layout"><article class="panel debate-card"><div class="debate-head"><span class="side claimant">Claimant position</span><span>VS</span><span class="side respondent">Respondent position</span></div><div class="argument left"><b>Meridian Infrastructure</b><p>The force-majeure clause cannot excuse delays where the respondent failed to issue timely notices and mitigation records.</p><small>Supported by: Clause 18.2 · Notices dated 14/03 and 29/03</small></div><div class="argument right"><b>Vistara Systems</b><p>The flood event was outside reasonable control and materially prevented performance under the agreed timeline.</p><small>Supported by: Weather records · Project correspondence</small></div><div class="argument left"><b>Counterpoint</b><p>The contractual notice condition is mandatory, and contemporaneous emails indicate delay had already begun.</p></div><div class="debate-input"><input placeholder="Ask the two sides to examine an issue…"/><button>Send ↑</button></div></article><aside class="panel debate-side"><p class="eyebrow">Debate snapshot</p><h2>Issues in contest</h2><div class="issue"><b>Notice compliance</b><span>High materiality</span></div><div class="issue"><b>Causation of delay</b><span>High materiality</span></div><div class="issue"><b>Scope variation</b><span>Moderate materiality</span></div><hr/><p>Arguments are generated for analytical comparison and should be verified against the record and controlling law.</p></aside></div></section>
+
+        <section class="view" id="lawyer"><div class="section-title"><div><p class="eyebrow">Lawyer portal</p><h1>Your preparation desk</h1><p>Prepare arguments, track filings, and understand the opposing case theory.</p></div></div><div class="lawyer-grid"><article class="panel lawyer-welcome"><span>⚖</span><h2>Prepare with the whole record.</h2><p>Upload your case materials to receive a structured case map, likely counterarguments, and a practice briefing.</p><button class="new-case" data-view="analysis">Open case workspace →</button></article><article class="panel lawyer-list"><p class="eyebrow">Your active matters</p><h2>Case preparation</h2><div class="lawyer-case"><span class="case-initials blue">MI</span><div><b>Meridian v. Vistara</b><small>Hearing today · Evidence</small></div><button>Open →</button></div><div class="lawyer-case"><span class="case-initials purple">AF</span><div><b>Aster Foods v. Northland</b><small>Hearing tomorrow · Arguments</small></div><button>Open →</button></div></article></div></section>
+      </main>
+    </div>
+    <div class="toast" id="toast"></div>
+    <script src="app.js"></script>
+  </body>
+</html>
